@@ -13,13 +13,12 @@ import filter as ft
 vals_limit = 100
 
 # Create figure for plotting
-xs = np.arange(vals_limit)
-ys = np.zeros(vals_limit)
-#ds = np.array([0, 0], int)
-ds = np.empty([0, 2])
-pw = pg.plot()
-curve = pw.plot(xs, ys, title='EMG over time')
-pw.setLabel('left', 'Power')
+# xs = np.arange(vals_limit)
+# ys = np.zeros(vals_limit)
+# ds = np.empty([0, 2])
+# pw = pg.plot()
+# curve = pw.plot(xs, ys, title='EMG over time')
+# pw.setLabel('left', 'Power')
 
 # Specify the port name
 # You should check this and change (if need) each time you reconnect the Arduino part
@@ -29,15 +28,10 @@ port2 ='/dev/tty.HC-06-DevB-1'
 # You should not change this constant
 baudrate = 9600
 
-# with serial.Serial(port,baudrate) as ser:
-#     for i in range(0,100000):
-#         line = ser.readline()
-#         print(line)
-
 # Connect to EMG serial port
 ser1 = serial.Serial(port1, baudrate)
 # Connect to RoboArm serial port
-# ser2 = serial.Serial(port2, baudrate)
+ser2 = serial.Serial(port2, baudrate)
 
 # Determ actual time
 start_time = time.monotonic()
@@ -62,8 +56,8 @@ def read_emg_once():
         return signal_time
     return None
 
-# def write_to_robot(move):
-#     ser2.write(bytes(str(move), 'utf-8'))
+def write_to_robot(move):
+    ser2.write(bytes(str(move), 'utf-8'))
 
 # This function is called periodically from FuncAnimation
 def update():
@@ -76,14 +70,12 @@ def update():
         return
 
     # Add x and y to lists
-    #ys = np.append(ys, int(emg_signal))
     ys = np.append(ys, emg_signal[0])
-    #ds = np.append(ds, [emg_signal])
     ds = np.vstack([ds, emg_signal])
 
     # Limit x and y lists to 20 items
-    xs = xs[-vals_limit:]
-    ys = ys[-vals_limit:]
+    # xs = xs[-vals_limit:]
+    # ys = ys[-vals_limit:]
 
     # Draw x and y lists
     #curve.setData(xs, ys)
@@ -92,7 +84,7 @@ def update():
     num_rows = np.shape(ds)[0]
     if num_rows >= 250:
         move = ft.data_processing(ds)
-        # write_to_robot(move)
+        write_to_robot(move)
         ds = np.empty([0, 2])
 
 # Set up calling update() function periodically
